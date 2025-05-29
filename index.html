@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Book - 次世代型健康管理プラットフォーム</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>Health Book</h1>
+                <p>次世代型健康管理プラットフォーム</p>
+            </div>
+            <nav class="nav">
+                <a href="#dashboard" class="nav-link active">ダッシュボード</a>
+                <a href="#profile" class="nav-link">プロフィール</a>
+                <a href="#settings" class="nav-link">設定</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="hero">
+                <h2>AI技術と専門家サポートを融合した健康管理</h2>
+                <p>あなたの健康データを一元管理し、予防医療を実現します</p>
+            </section>
+
+            <section class="core-features">
+                <h3>2大コア機能</h3>
+                <div class="feature-cards">
+                    <div class="feature-card" id="health-record">
+                        <div class="card-icon">📊</div>
+                        <h4>健康記録</h4>
+                        <p>バイタルデータ・生活習慣の可視化</p>
+                        <ul>
+                            <li>カスタマイズ可能な記録フォーマット</li>
+                            <li>直感的なデータ入力</li>
+                            <li>トレンド分析</li>
+                        </ul>
+                        <button class="btn-primary" onclick="openHealthRecord()">記録を開始</button>
+                    </div>
+
+                    <div class="feature-card" id="ai-diagnosis">
+                        <div class="card-icon">🤖</div>
+                        <h4>AI診断</h4>
+                        <p>記録データのリアルタイム分析</p>
+                        <ul>
+                            <li>健康リスクの早期警告</li>
+                            <li>パーソナル改善提案</li>
+                            <li>予測分析レポート</li>
+                        </ul>
+                        <button class="btn-primary" onclick="openAIDiagnosis()">AI分析を実行</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-preview">
+                <h3>健康ダッシュボード</h3>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h5>今日のバイタル</h5>
+                        <div class="vital-data">
+                            <div class="vital-item">
+                                <span class="vital-label">血圧</span>
+                                <span class="vital-value">120/80</span>
+                                <span class="vital-status normal">正常</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">心拍数</span>
+                                <span class="vital-value">72 bpm</span>
+                                <span class="vital-status normal">正常</span>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">体重</span>
+                                <span class="vital-value">65.2 kg</span>
+                                <span class="vital-status normal">目標内</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h5>AIアラート</h5>
+                        <div class="alert-list">
+                            <div class="alert-item">
+                                <span class="alert-icon">💡</span>
+                                <span class="alert-text">水分摂取量が少し不足しています</span>
+                            </div>
+                            <div class="alert-item">
+                                <span class="alert-icon">🏃</span>
+                                <span class="alert-text">今日の運動目標まであと30分</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h5>健康統計</h5>
+                        <div class="health-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">記録日数</span>
+                                <span class="stat-value">15日</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">平均健康スコア</span>
+                                <span class="stat-value">85点</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- モーダルウィンドウ -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Health Book. AI技術と専門家サポートを融合した次世代型健康管理プラットフォーム</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
