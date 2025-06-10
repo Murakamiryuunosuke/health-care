@@ -1,438 +1,1165 @@
-// Health Book Platform JavaScript
-// AI技術と専門家サポートを融合した健康管理プラットフォーム
+// Health Book - インタラクション機能（新デザイン対応）
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Health Book プラットフォームが読み込まれました');
-    initializeApp();
+    // 全ての円形ボタンを取得
+    const circularButtons = document.querySelectorAll('.circular-button');
+    
+    // 各ボタンにイベントリスナーを追加
+    circularButtons.forEach(button => {
+        const buttonTitle = button.querySelector('.button-title').textContent;
+        const buttonType = button.classList.contains('ai-diagnosis') ? 'AI診断' : '健康記録';
+        
+        // クリック/タップイベント
+        button.addEventListener('click', function() {
+            handleButtonClick(buttonType);
+        });
+        
+        // キーボードイベント（Enterキーとスペースキー）
+        button.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleButtonClick(buttonType);
+            }
+        });
+        
+        // タッチイベント用の追加処理
+        let touchStartTime;
+        
+        button.addEventListener('touchstart', function(event) {
+            touchStartTime = Date.now();
+            // タッチフィードバック開始
+            button.style.transform = 'translateY(-1px) scale(0.98)';
+        }, { passive: true });
+        
+        button.addEventListener('touchend', function(event) {
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // タッチフィードバック終了
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 100);
+            
+            // 短いタップのみ反応（長押し無効化）
+            if (touchDuration < 500) {
+                event.preventDefault();
+                handleButtonClick(buttonType);
+            }
+        }, { passive: false });
+        
+        // タッチキャンセル時の処理
+        button.addEventListener('touchcancel', function() {
+            button.style.transform = '';
+        });
+        
+        // マウスイベント用の追加処理
+        button.addEventListener('mousedown', function() {
+            button.style.transform = 'translateY(-1px) scale(0.98)';
+        });
+        
+        button.addEventListener('mouseup', function() {
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 100);
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            button.style.transform = '';
+        });
+    });
 });
 
-function initializeApp() {
-    // アニメーション効果の初期化
-    animateOnScroll();
+/**
+ * ボタンクリック時の処理
+ * @param {string} buttonType - ボタンタイプ（AI診断 or 健康記録）
+ */
+function handleButtonClick(buttonType) {
+    // デバッグ用ログ
+    console.log(`${buttonType}ボタンがクリックされました`);
     
-    // リアルタイムデータ更新のシミュレーション
-    updateHealthData();
+    // ボタンにパルス効果を追加
+    addPulseEffect(buttonType);
     
-    // ユーザーインターフェースの初期化
-    initializeInteractions();
-}
-
-// 健康記録機能
-function openHealthRecord() {
-    const modalContent = `
-        <h3>健康記録</h3>
-        <div class="health-record-form">
-            <h4>今日のバイタルデータを記録</h4>
-            <form id="health-form">
-                <div class="form-group">
-                    <label for="blood-pressure">血圧 (mmHg)</label>
-                    <div class="input-group">
-                        <input type="number" id="systolic" placeholder="収縮期" min="80" max="200">
-                        <span>/</span>
-                        <input type="number" id="diastolic" placeholder="拡張期" min="50" max="120">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="heart-rate">心拍数 (bpm)</label>
-                    <input type="number" id="heart-rate" placeholder="例: 72" min="40" max="200">
-                </div>
-                
-                <div class="form-group">
-                    <label for="weight">体重 (kg)</label>
-                    <input type="number" id="weight" placeholder="例: 65.2" step="0.1" min="30" max="200">
-                </div>
-                
-                <div class="form-group">
-                    <label for="sleep-hours">睡眠時間 (時間)</label>
-                    <input type="number" id="sleep-hours" placeholder="例: 7.5" step="0.5" min="0" max="24">
-                </div>
-                
-                <div class="form-group">
-                    <label for="exercise-minutes">運動時間 (分)</label>
-                    <input type="number" id="exercise-minutes" placeholder="例: 30" min="0" max="600">
-                </div>
-                
-                <div class="form-group">
-                    <label for="water-intake">水分摂取量 (L)</label>
-                    <input type="number" id="water-intake" placeholder="例: 2.0" step="0.1" min="0" max="10">
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">記録を保存</button>
-                    <button type="button" class="btn-secondary" onclick="closeModal()">キャンセル</button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    showModal(modalContent);
-    
-    // フォーム送信処理
-    document.getElementById('health-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveHealthRecord();
-    });
-}
-
-// AI診断機能
-function openAIDiagnosis() {
-    const modalContent = `
-        <h3>AI健康診断</h3>
-        <div class="ai-diagnosis-content">
-            <div class="diagnosis-progress">
-                <h4>データ分析中...</h4>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <p id="progress-text">健康データを解析しています</p>
-            </div>
-            
-            <div class="diagnosis-results" id="diagnosis-results" style="display: none;">
-                <h4>🤖 AI分析結果</h4>
-                
-                <div class="health-score">
-                    <h5>総合健康スコア</h5>
-                    <div class="score-circle">
-                        <span class="score-value">85</span>
-                        <span class="score-max">/100</span>
-                    </div>
-                    <p class="score-status">良好な健康状態です</p>
-                </div>
-                
-                <div class="recommendations">
-                    <h5>💡 改善提案</h5>
-                    <ul>
-                        <li class="recommendation-item">
-                            <span class="rec-icon">💧</span>
-                            <span>水分摂取量を1日200ml増やすことを推奨します</span>
-                        </li>
-                        <li class="recommendation-item">
-                            <span class="rec-icon">🏃</span>
-                            <span>週3回、30分の有酸素運動を継続しましょう</span>
-                        </li>
-                        <li class="recommendation-item">
-                            <span class="rec-icon">😴</span>
-                            <span>睡眠時間を7-8時間に調整することで更なる改善が期待できます</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="risk-alerts">
-                    <h5>⚠️ 注意事項</h5>
-                    <div class="alert-card">
-                        <p>血圧の変動が見られます。継続的な記録と健康的な生活習慣を心がけましょう。</p>
-                        <button class="btn-primary" onclick="openHealthRecord()">追加記録する</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    showModal(modalContent);
-    startAIDiagnosis();
-}
-
-
-// モーダル表示機能
-function showModal(content) {
-    const modal = document.getElementById('modal');
-    const modalBody = document.getElementById('modal-body');
-    modalBody.innerHTML = content;
-    modal.style.display = 'block';
-    
-    // アクセシビリティ: フォーカス管理
-    const firstInput = modalBody.querySelector('input, button, select, textarea');
-    if (firstInput) {
-        firstInput.focus();
+    // 実際の機能呼び出し
+    switch(buttonType) {
+        case 'AI診断':
+            handleAIDiagnosis();
+            break;
+        case '健康記録':
+            handleHealthRecord();
+            break;
+        default:
+            console.log('未知のボタンタイプ:', buttonType);
     }
 }
 
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
+/**
+ * パルス効果の追加
+ * @param {string} buttonType - ボタンタイプ
+ */
+function addPulseEffect(buttonType) {
+    const button = buttonType === 'AI診断' 
+        ? document.querySelector('.ai-diagnosis')
+        : document.querySelector('.health-record');
+    
+    if (!button) return;
+    
+    // パルス効果のCSS追加
+    button.style.animation = 'pulse 0.6s ease-out';
+    
+    // アニメーション終了後にリセット
+    setTimeout(() => {
+        button.style.animation = '';
+    }, 600);
 }
 
-// 健康記録保存
-function saveHealthRecord() {
-    const formData = {
-        systolic: document.getElementById('systolic').value,
-        diastolic: document.getElementById('diastolic').value,
-        heartRate: document.getElementById('heart-rate').value,
-        weight: document.getElementById('weight').value,
-        sleepHours: document.getElementById('sleep-hours').value,
-        exerciseMinutes: document.getElementById('exercise-minutes').value,
-        waterIntake: document.getElementById('water-intake').value,
-        timestamp: new Date().toISOString()
-    };
+/**
+ * AI診断機能の処理
+ */
+function handleAIDiagnosis() {
+    console.log('AI診断機能を実行中...');
     
-    // ローカルストレージに保存（実際のアプリではサーバーに送信）
-    const existingData = JSON.parse(localStorage.getItem('healthRecords') || '[]');
-    existingData.push(formData);
-    localStorage.setItem('healthRecords', JSON.stringify(existingData));
-    
-    showSuccessMessage('健康記録が保存されました！');
-    closeModal();
-    updateDashboard();
+    // AI診断モーダルを表示
+    showAIDiagnosisModal();
 }
 
-// AI診断進行
-function startAIDiagnosis() {
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-    const results = document.getElementById('diagnosis-results');
+/**
+ * 健康記録機能の処理
+ */
+function handleHealthRecord() {
+    console.log('健康記録機能を実行中...');
     
-    let progress = 0;
-    const steps = [
-        'バイタルデータを分析中...',
-        '生活習慣パターンを解析中...',
-        '健康リスクを評価中...',
-        '改善提案を生成中...',
-        '分析完了！'
-    ];
-    
-    const interval = setInterval(() => {
-        progress += 20;
-        progressFill.style.width = progress + '%';
-        
-        if (progress <= 80) {
-            progressText.textContent = steps[Math.floor(progress / 20)];
-        } else {
-            progressText.textContent = steps[4];
-            clearInterval(interval);
-            
-            setTimeout(() => {
-                document.querySelector('.diagnosis-progress').style.display = 'none';
-                results.style.display = 'block';
-            }, 1000);
-        }
-    }, 800);
+    // 健康記録入力モーダルを表示
+    showHealthRecordModal();
 }
 
-
-// 成功メッセージ表示
-function showSuccessMessage(message) {
-    const successDiv = document.createElement('div');
-    successDiv.className = 'success-message';
-    successDiv.innerHTML = `
-        <div class="success-content">
-            <span class="success-icon">✅</span>
-            <span>${message}</span>
-        </div>
+/**
+ * 一時的なフィードバック表示
+ * @param {string} message - 表示するメッセージ
+ * @param {string} backgroundColor - 背景色
+ */
+function showTemporaryFeedback(message, backgroundColor = '#4CAF50') {
+    // 既存のフィードバックがあれば削除
+    const existingFeedback = document.querySelector('.temporary-feedback');
+    if (existingFeedback) {
+        existingFeedback.remove();
+    }
+    
+    // フィードバック要素を作成
+    const feedback = document.createElement('div');
+    feedback.className = 'temporary-feedback';
+    feedback.textContent = message;
+    feedback.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: ${backgroundColor};
+        color: #000000;
+        padding: 15px 25px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 1000;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        border: 2px solid #000000;
+        font-family: 'Noto Sans JP', sans-serif;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        text-align: center;
     `;
     
-    document.body.appendChild(successDiv);
+    // DOMに追加
+    document.body.appendChild(feedback);
     
+    // フェードイン
     setTimeout(() => {
-        successDiv.remove();
+        feedback.style.opacity = '1';
+        feedback.style.transform = 'translateX(-50%) translateY(-5px)';
+    }, 10);
+    
+    // 3秒後にフェードアウトして削除
+    setTimeout(() => {
+        feedback.style.opacity = '0';
+        feedback.style.transform = 'translateX(-50%) translateY(5px)';
+        setTimeout(() => {
+            if (feedback.parentNode) {
+                feedback.remove();
+            }
+        }, 300);
     }, 3000);
 }
 
-// ダッシュボード更新
-function updateDashboard() {
-    // 最新の健康記録を取得してダッシュボードを更新
-    const records = JSON.parse(localStorage.getItem('healthRecords') || '[]');
-    if (records.length > 0) {
-        const latest = records[records.length - 1];
-        
-        // バイタルデータの更新
-        const vitalItems = document.querySelectorAll('.vital-item');
-        if (latest.systolic && latest.diastolic) {
-            vitalItems[0].querySelector('.vital-value').textContent = `${latest.systolic}/${latest.diastolic}`;
-        }
-        if (latest.heartRate) {
-            vitalItems[1].querySelector('.vital-value').textContent = `${latest.heartRate} bpm`;
-        }
-        if (latest.weight) {
-            vitalItems[2].querySelector('.vital-value').textContent = `${latest.weight} kg`;
-        }
-    }
-}
-
-// リアルタイムデータ更新シミュレーション
-function updateHealthData() {
-    setInterval(() => {
-        // 時間の更新など
-        const now = new Date();
-        console.log(`Health Book: ${now.toLocaleTimeString()} - システム正常動作中`);
-    }, 60000); // 1分ごと
-}
-
-// スクロールアニメーション
-function animateOnScroll() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-            }
-        });
-    });
-    
-    document.querySelectorAll('.feature-card, .dashboard-card').forEach(card => {
-        observer.observe(card);
-    });
-}
-
-// インタラクション初期化
-function initializeInteractions() {
-    // モーダルの外側クリックで閉じる
-    window.onclick = function(event) {
-        const modal = document.getElementById('modal');
-        if (event.target === modal) {
-            closeModal();
-        }
-    };
-    
-    // ESCキーでモーダルを閉じる
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModal();
-        }
-    });
-    
-}
-
-// CSS アニメーション用のスタイルを動的に追加
+// パルス効果のCSSアニメーション追加
 const style = document.createElement('style');
 style.textContent = `
-    .success-message {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--success);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        z-index: 1001;
-        animation: slideIn 0.3s ease;
-    }
-    
-    .success-content {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    .progress-bar {
-        width: 100%;
-        height: 8px;
-        background: var(--medium-gray);
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 1rem 0;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary-green), var(--accent-orange));
-        transition: width 0.3s ease;
-        width: 0%;
-    }
-    
-    .score-circle {
-        display: inline-block;
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-green);
-        margin: 1rem 0;
-    }
-    
-    .score-max {
-        font-size: 1rem;
-        color: var(--medium-gray);
-    }
-    
-    .recommendation-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        background: var(--light-gray);
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .rec-icon {
-        font-size: 1.25rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: var(--primary-navy);
-    }
-    
-    .form-group input, .form-group select, .form-group textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid var(--medium-gray);
-        border-radius: 6px;
-        font-size: 16px;
-        transition: border-color 0.3s ease;
-    }
-    
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-        outline: none;
-        border-color: var(--primary-green);
-    }
-    
-    .input-group {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .input-group input {
-        flex: 1;
-    }
-    
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        margin-top: 2rem;
-    }
-    
-    .btn-secondary {
-        background: var(--medium-gray);
-        color: var(--dark-gray);
-        border: none;
-        padding: 1rem 2rem;
-        font-size: 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-        background: var(--dark-gray);
-        color: var(--white);
-    }
-    
-    .alert-card {
-        padding: 1rem;
-        background: var(--light-gray);
-        border-radius: 8px;
-        border-left: 3px solid var(--warning);
-        margin-top: 0.5rem;
-    }
-    
-    .alert-card p {
-        margin-bottom: 1rem;
-        color: var(--dark-gray);
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
     }
 `;
-
 document.head.appendChild(style);
 
-console.log('Health Book Platform JavaScript loaded successfully');
+// パフォーマンス最適化：パッシブイベントリスナー
+document.addEventListener('touchstart', function() {}, { passive: true });
+document.addEventListener('touchmove', function() {}, { passive: true });
+
+// 健康記録関連の機能
+
+// グローバル変数
+let currentRatingGroup = null;
+let currentDate = new Date();
+
+/**
+ * 健康記録入力モーダルを表示
+ */
+function showHealthRecordModal() {
+    const modal = document.getElementById('health-record-modal');
+    modal.classList.remove('hidden');
+    
+    // フォームをリセット
+    document.getElementById('health-record-form').reset();
+    document.getElementById('throat-pain').value = '';
+    document.getElementById('runny-nose').value = '';
+    
+    // 選択状態をクリア
+    document.querySelectorAll('.rating-btn.selected').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+}
+
+/**
+ * カレンダーを表示
+ */
+function showCalendar() {
+    renderCalendar();
+}
+
+/**
+ * 健康記録データを取得
+ */
+function getHealthRecords() {
+    const data = localStorage.getItem('healthRecords');
+    return data ? JSON.parse(data) : [];
+}
+
+/**
+ * 健康記録データを保存
+ */
+function saveHealthRecord(record) {
+    const records = getHealthRecords();
+    const dateKey = record.date;
+    
+    // 同じ日付の記録があれば更新、なければ追加
+    const existingIndex = records.findIndex(r => r.date === dateKey);
+    if (existingIndex >= 0) {
+        records[existingIndex] = record;
+    } else {
+        records.push(record);
+    }
+    
+    localStorage.setItem('healthRecords', JSON.stringify(records));
+}
+
+/**
+ * カレンダーを描画
+ */
+function renderCalendar() {
+    const grid = document.getElementById('calendar-grid');
+    const monthSpan = document.getElementById('current-month');
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // 月表示を更新
+    monthSpan.textContent = `${year}年${month + 1}月`;
+    
+    // カレンダーグリッドをクリア
+    grid.innerHTML = '';
+    
+    // 曜日ヘッダーを追加
+    const dayHeaders = ['日', '月', '火', '水', '木', '金', '土'];
+    dayHeaders.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.textContent = day;
+        dayHeader.style.fontWeight = '700';
+        dayHeader.style.textAlign = 'center';
+        dayHeader.style.padding = '10px 5px';
+        dayHeader.style.backgroundColor = 'var(--bg-color)';
+        dayHeader.style.border = '1px solid var(--button-border)';
+        grid.appendChild(dayHeader);
+    });
+    
+    // 月の最初と最後の日を取得
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    // 健康記録データを取得
+    const healthRecords = getHealthRecords();
+    const today = new Date();
+    
+    // カレンダーの日付を生成（6週間分）
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        
+        // 他の月の日付かチェック
+        if (date.getMonth() !== month) {
+            dayElement.classList.add('other-month');
+        }
+        
+        // 今日かチェック
+        if (date.toDateString() === today.toDateString()) {
+            dayElement.classList.add('today');
+        }
+        
+        // 日付を表示
+        const dayNumber = document.createElement('div');
+        dayNumber.textContent = date.getDate();
+        dayElement.appendChild(dayNumber);
+        
+        // 健康記録があるかチェック
+        const dateKey = formatDate(date);
+        const record = healthRecords.find(r => r.date === dateKey);
+        
+        if (record) {
+            dayElement.classList.add('has-record');
+            
+            // 健康記録の詳細を表示
+            const indicator = document.createElement('div');
+            indicator.className = 'health-record-indicator';
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.className = 'temp';
+            tempDiv.textContent = `${record.temperature}℃`;
+            indicator.appendChild(tempDiv);
+            
+            const symptomsDiv = document.createElement('div');
+            symptomsDiv.className = 'symptoms';
+            symptomsDiv.textContent = `のど:${record.throatPain} 鼻:${record.runnyNose}`;
+            indicator.appendChild(symptomsDiv);
+            
+            dayElement.appendChild(indicator);
+        }
+        
+        // クリックイベントを追加（現在の月の日付のみ）
+        if (date.getMonth() === month) {
+            dayElement.addEventListener('click', () => {
+                showHealthRecordModalForDate(date);
+            });
+        }
+        
+        grid.appendChild(dayElement);
+    }
+}
+
+/**
+ * 指定した日付の健康記録入力モーダルを表示
+ */
+function showHealthRecordModalForDate(date) {
+    const dateKey = formatDate(date);
+    const healthRecords = getHealthRecords();
+    const existingRecord = healthRecords.find(r => r.date === dateKey);
+    
+    showHealthRecordModal();
+    
+    // 既存の記録があれば値を設定
+    if (existingRecord) {
+        document.getElementById('temperature').value = existingRecord.temperature;
+        document.getElementById('throat-pain').value = existingRecord.throatPain;
+        document.getElementById('runny-nose').value = existingRecord.runnyNose;
+        
+        // 評価ボタンの選択状態を復元
+        document.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            const group = btn.closest('.input-group');
+            const hiddenInput = group.querySelector('input[type="hidden"]');
+            if (hiddenInput.value === btn.dataset.rating) {
+                btn.classList.add('selected');
+            }
+        });
+    }
+    
+    // フォームに日付情報を保存
+    document.getElementById('health-record-form').dataset.date = dateKey;
+}
+
+/**
+ * 日付をフォーマット（YYYY-MM-DD）
+ */
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// イベントリスナーの設定
+document.addEventListener('DOMContentLoaded', function() {
+    // ページ読み込み時にカレンダーを表示
+    renderCalendar();
+    
+    // 「新しく記録する」ボタンのイベント
+    document.getElementById('add-record-btn').addEventListener('click', function() {
+        showHealthRecordModal();
+    });
+    
+    // 評価ボタンのイベント
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('rating-btn')) {
+            const group = e.target.closest('.input-group');
+            const hiddenInput = group.querySelector('input[type="hidden"]');
+            const buttons = group.querySelectorAll('.rating-btn');
+            
+            // 同じグループ内の他のボタンの選択を解除
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            // クリックされたボタンを選択状態にする
+            e.target.classList.add('selected');
+            hiddenInput.value = e.target.dataset.rating;
+        }
+    });
+    
+    // モーダルを閉じる
+    document.getElementById('close-modal').addEventListener('click', function() {
+        document.getElementById('health-record-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('cancel-form').addEventListener('click', function() {
+        document.getElementById('health-record-modal').classList.add('hidden');
+    });
+    
+    // フォーム送信
+    document.getElementById('health-record-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const temperature = document.getElementById('temperature').value;
+        const throatPain = document.getElementById('throat-pain').value;
+        const runnyNose = document.getElementById('runny-nose').value;
+        
+        // バリデーション
+        if (!temperature || !throatPain || !runnyNose) {
+            alert('すべての項目を入力してください。');
+            return;
+        }
+        
+        if (parseFloat(temperature) < 35 || parseFloat(temperature) > 42) {
+            alert('体温は35℃から42℃の間で入力してください。');
+            return;
+        }
+        
+        // 日付を取得（フォームに保存されている場合はそれを使用、なければ今日）
+        const dateKey = this.dataset.date || formatDate(new Date());
+        
+        // 健康記録を保存
+        const record = {
+            date: dateKey,
+            temperature: parseFloat(temperature),
+            throatPain: parseInt(throatPain),
+            runnyNose: parseInt(runnyNose),
+            timestamp: new Date().toISOString()
+        };
+        
+        saveHealthRecord(record);
+        
+        // モーダルを閉じる
+        document.getElementById('health-record-modal').classList.add('hidden');
+        
+        // 成功メッセージを表示
+        showTemporaryFeedback('✅ 健康記録を保存しました', '#CCFFCC');
+        
+        // カレンダーを更新
+        renderCalendar();
+    });
+    
+    // カレンダーナビゲーション
+    document.getElementById('prev-month').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+    
+    document.getElementById('next-month').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+    
+    // マイページアイコンのクリックイベント
+    document.getElementById('user-icon').addEventListener('click', function() {
+        showMyPage();
+    });
+    
+    // マイページを閉じる
+    document.getElementById('close-mypage').addEventListener('click', function() {
+        document.getElementById('mypage-modal').classList.add('hidden');
+    });
+    
+    // プロフィール編集
+    document.getElementById('edit-profile-btn').addEventListener('click', function() {
+        showProfileEditModal();
+    });
+    
+    document.getElementById('close-profile-edit').addEventListener('click', function() {
+        document.getElementById('profile-edit-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('cancel-profile-edit').addEventListener('click', function() {
+        document.getElementById('profile-edit-modal').classList.add('hidden');
+    });
+    
+    // プロフィール編集フォーム送信
+    document.getElementById('profile-edit-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveProfile();
+    });
+    
+    // データエクスポート
+    document.getElementById('export-data-btn').addEventListener('click', function() {
+        exportHealthData();
+    });
+    
+    // データ削除
+    document.getElementById('clear-data-btn').addEventListener('click', function() {
+        clearAllData();
+    });
+    
+    // モーダル背景クリックで閉じる
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.add('hidden');
+        }
+    });
+    
+    // プロフィール情報を読み込み
+    loadProfile();
+});
+
+// マイページ関連の機能
+
+/**
+ * マイページを表示
+ */
+function showMyPage() {
+    const modal = document.getElementById('mypage-modal');
+    modal.classList.remove('hidden');
+    updateHealthStats();
+}
+
+/**
+ * プロフィール編集モーダルを表示
+ */
+function showProfileEditModal() {
+    const profile = getProfile();
+    document.getElementById('edit-name').value = profile.name;
+    document.getElementById('edit-email').value = profile.email;
+    
+    document.getElementById('profile-edit-modal').classList.remove('hidden');
+}
+
+/**
+ * プロフィール情報を取得
+ */
+function getProfile() {
+    const data = localStorage.getItem('userProfile');
+    return data ? JSON.parse(data) : {
+        name: 'ユーザー',
+        email: 'user@example.com'
+    };
+}
+
+/**
+ * プロフィール情報を保存
+ */
+function saveProfile() {
+    const name = document.getElementById('edit-name').value;
+    const email = document.getElementById('edit-email').value;
+    
+    if (!name || !email) {
+        alert('すべての項目を入力してください。');
+        return;
+    }
+    
+    const profile = { name, email };
+    localStorage.setItem('userProfile', JSON.stringify(profile));
+    
+    // 表示を更新
+    loadProfile();
+    
+    // モーダルを閉じる
+    document.getElementById('profile-edit-modal').classList.add('hidden');
+    
+    showTemporaryFeedback('✅ プロフィールを更新しました', '#CCFFCC');
+}
+
+/**
+ * プロフィール情報を読み込み
+ */
+function loadProfile() {
+    const profile = getProfile();
+    document.getElementById('profile-name').textContent = profile.name;
+    document.getElementById('profile-email').textContent = profile.email;
+}
+
+/**
+ * 健康記録統計を更新
+ */
+function updateHealthStats() {
+    const records = getHealthRecords();
+    
+    // 記録日数
+    document.getElementById('total-records').textContent = records.length;
+    
+    // 平均体温
+    if (records.length > 0) {
+        const avgTemp = records.reduce((sum, record) => sum + record.temperature, 0) / records.length;
+        document.getElementById('avg-temperature').textContent = avgTemp.toFixed(1) + '℃';
+    } else {
+        document.getElementById('avg-temperature').textContent = '--';
+    }
+    
+    // 連続記録日数
+    const streak = calculateStreak(records);
+    document.getElementById('recent-streak').textContent = streak + '日';
+}
+
+/**
+ * 連続記録日数を計算
+ */
+function calculateStreak(records) {
+    if (records.length === 0) return 0;
+    
+    // 日付順にソート
+    const sortedRecords = records.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    let streak = 0;
+    const today = new Date();
+    let currentDate = new Date(today);
+    
+    for (let i = 0; i < sortedRecords.length; i++) {
+        const recordDate = new Date(sortedRecords[i].date);
+        const expectedDate = new Date(currentDate);
+        
+        if (recordDate.toDateString() === expectedDate.toDateString()) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+        } else {
+            break;
+        }
+    }
+    
+    return streak;
+}
+
+/**
+ * 健康データをエクスポート
+ */
+function exportHealthData() {
+    const records = getHealthRecords();
+    const profile = getProfile();
+    
+    const exportData = {
+        profile: profile,
+        healthRecords: records,
+        exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `健康記録_${formatDate(new Date())}.json`;
+    link.click();
+    
+    showTemporaryFeedback('✅ データをエクスポートしました', '#CCFFCC');
+}
+
+/**
+ * すべてのデータを削除
+ */
+function clearAllData() {
+    if (confirm('すべての健康記録データを削除しますか？この操作は取り消せません。')) {
+        localStorage.removeItem('healthRecords');
+        localStorage.removeItem('userProfile');
+        
+        // 表示を更新
+        loadProfile();
+        updateHealthStats();
+        renderCalendar();
+        
+        showTemporaryFeedback('🗑️ すべてのデータを削除しました', '#ffcccc');
+    }
+}
+
+// AI診断機能
+let aiDiagnosisState = {
+    currentQuestion: 0,
+    answers: {},
+    questions: [
+        {
+            id: 'fever',
+            text: '発熱していますか？',
+            type: 'yesno',
+            options: ['はい', 'いいえ']
+        },
+        {
+            id: 'medication',
+            text: '現在薬を服用していますか？',
+            type: 'yesno',
+            options: ['はい', 'いいえ']
+        },
+        {
+            id: 'homeRemedies',
+            text: '家の中に常備薬はありますか？',
+            type: 'scale',
+            options: ['1', '2', '3', '4', '5'],
+            scaleLabels: ['全くない', '少しある', 'ある程度ある', 'かなりある', 'たくさんある']
+        },
+        {
+            id: 'mobility',
+            text: '病院まで歩けそうですか？',
+            type: 'yesno',
+            options: ['はい', 'いいえ']
+        },
+        {
+            id: 'support',
+            text: '現在頼れる人はいますか？',
+            type: 'yesno',
+            options: ['はい', 'いいえ']
+        }
+    ]
+};
+
+/**
+ * AI診断モーダルを表示
+ */
+function showAIDiagnosisModal() {
+    const modal = document.getElementById('ai-diagnosis-modal');
+    modal.classList.remove('hidden');
+    
+    // 診断状態をリセット
+    resetAIDiagnosis();
+    
+    // 最初の質問を表示
+    showCurrentQuestion();
+}
+
+/**
+ * AI診断状態をリセット
+ */
+function resetAIDiagnosis() {
+    aiDiagnosisState.currentQuestion = 0;
+    aiDiagnosisState.answers = {};
+    
+    // 質問セクションを表示、結果セクションを非表示
+    document.getElementById('ai-diagnosis-questions').classList.remove('hidden');
+    document.getElementById('ai-diagnosis-result').classList.add('hidden');
+}
+
+/**
+ * 現在の質問を表示
+ */
+function showCurrentQuestion() {
+    const questionData = aiDiagnosisState.questions[aiDiagnosisState.currentQuestion];
+    const currentQuestionNum = aiDiagnosisState.currentQuestion + 1;
+    const totalQuestions = aiDiagnosisState.questions.length;
+    
+    // プログレスバーを更新
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = (currentQuestionNum / totalQuestions) * 100;
+    progressFill.style.width = `${progressPercent}%`;
+    
+    // 質問番号を更新
+    document.getElementById('current-question').textContent = currentQuestionNum;
+    
+    // 質問文を更新
+    document.getElementById('question-text').textContent = questionData.text;
+    
+    // 回答オプションを生成
+    const answerOptionsContainer = document.getElementById('answer-options');
+    answerOptionsContainer.innerHTML = '';
+    
+    if (questionData.type === 'yesno') {
+        answerOptionsContainer.className = 'answer-options';
+        questionData.options.forEach((option, index) => {
+            const optionElement = document.createElement('div');
+            optionElement.className = 'answer-option';
+            optionElement.textContent = option;
+            optionElement.addEventListener('click', () => selectAnswer(index));
+            answerOptionsContainer.appendChild(optionElement);
+        });
+    } else if (questionData.type === 'scale') {
+        answerOptionsContainer.className = 'answer-options';
+        
+        const scaleContainer = document.createElement('div');
+        scaleContainer.className = 'scale-options';
+        
+        questionData.options.forEach((option, index) => {
+            const optionElement = document.createElement('div');
+            optionElement.className = 'scale-option';
+            optionElement.textContent = option;
+            optionElement.addEventListener('click', () => selectAnswer(index));
+            scaleContainer.appendChild(optionElement);
+        });
+        
+        answerOptionsContainer.appendChild(scaleContainer);
+        
+        // スケールラベルを追加
+        const labelsContainer = document.createElement('div');
+        labelsContainer.className = 'scale-labels';
+        labelsContainer.innerHTML = `
+            <span>${questionData.scaleLabels[0]}</span>
+            <span>${questionData.scaleLabels[4]}</span>
+        `;
+        answerOptionsContainer.appendChild(labelsContainer);
+    }
+    
+    // ナビゲーションボタンの状態を更新
+    updateNavigationButtons();
+}
+
+/**
+ * 回答を選択
+ */
+function selectAnswer(answerIndex) {
+    const questionData = aiDiagnosisState.questions[aiDiagnosisState.currentQuestion];
+    
+    // 既存の選択状態をクリア
+    document.querySelectorAll('.answer-option, .scale-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // 新しい選択状態を設定
+    const selectedOption = document.querySelectorAll('.answer-option, .scale-option')[answerIndex];
+    selectedOption.classList.add('selected');
+    
+    // 回答を保存
+    aiDiagnosisState.answers[questionData.id] = {
+        index: answerIndex,
+        value: questionData.options[answerIndex],
+        text: questionData.type === 'yesno' ? questionData.options[answerIndex] :
+              questionData.type === 'scale' ? questionData.scaleLabels[answerIndex] : questionData.options[answerIndex]
+    };
+    
+    // ナビゲーションボタンの状態を更新
+    updateNavigationButtons();
+}
+
+/**
+ * ナビゲーションボタンの状態を更新
+ */
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-question');
+    const nextBtn = document.getElementById('next-question');
+    const startBtn = document.getElementById('start-diagnosis');
+    
+    const isFirstQuestion = aiDiagnosisState.currentQuestion === 0;
+    const isLastQuestion = aiDiagnosisState.currentQuestion === aiDiagnosisState.questions.length - 1;
+    const hasAnswer = aiDiagnosisState.questions[aiDiagnosisState.currentQuestion].id in aiDiagnosisState.answers;
+    
+    // 前の質問ボタン
+    prevBtn.style.display = isFirstQuestion ? 'none' : 'block';
+    
+    // 次の質問ボタンと診断開始ボタン
+    if (isLastQuestion) {
+        nextBtn.style.display = 'none';
+        startBtn.style.display = hasAnswer ? 'block' : 'none';
+    } else {
+        nextBtn.style.display = hasAnswer ? 'block' : 'none';
+        startBtn.style.display = 'none';
+    }
+    
+    // ボタンの有効/無効状態
+    nextBtn.disabled = !hasAnswer;
+    startBtn.disabled = !hasAnswer;
+}
+
+/**
+ * 前の質問に戻る
+ */
+function goToPreviousQuestion() {
+    if (aiDiagnosisState.currentQuestion > 0) {
+        aiDiagnosisState.currentQuestion--;
+        showCurrentQuestion();
+        
+        // 既存の回答を復元
+        const questionData = aiDiagnosisState.questions[aiDiagnosisState.currentQuestion];
+        const existingAnswer = aiDiagnosisState.answers[questionData.id];
+        if (existingAnswer) {
+            setTimeout(() => {
+                const options = document.querySelectorAll('.answer-option, .scale-option');
+                if (options[existingAnswer.index]) {
+                    options[existingAnswer.index].classList.add('selected');
+                }
+            }, 100);
+        }
+    }
+}
+
+/**
+ * 次の質問に進む
+ */
+function goToNextQuestion() {
+    if (aiDiagnosisState.currentQuestion < aiDiagnosisState.questions.length - 1) {
+        aiDiagnosisState.currentQuestion++;
+        showCurrentQuestion();
+        
+        // 既存の回答を復元
+        const questionData = aiDiagnosisState.questions[aiDiagnosisState.currentQuestion];
+        const existingAnswer = aiDiagnosisState.answers[questionData.id];
+        if (existingAnswer) {
+            setTimeout(() => {
+                const options = document.querySelectorAll('.answer-option, .scale-option');
+                if (options[existingAnswer.index]) {
+                    options[existingAnswer.index].classList.add('selected');
+                }
+            }, 100);
+        }
+    }
+}
+
+/**
+ * 最近の健康記録を取得
+ */
+function getRecentHealthRecords(healthRecords, days) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    return healthRecords.filter(record => {
+        const recordDate = new Date(record.date);
+        return recordDate >= cutoffDate;
+    });
+}
+
+/**
+ * AI診断を実行
+ */
+function performAIDiagnosis() {
+    // 健康記録データを取得
+    const healthRecords = getHealthRecords();
+    
+    // 診断ロジックを実行
+    const diagnosis = generateDiagnosis(aiDiagnosisState.answers, healthRecords);
+    
+    // 結果を表示
+    showDiagnosisResult(diagnosis);
+}
+
+/**
+ * 診断ロジック
+ */
+function generateDiagnosis(answers, healthRecords) {
+    const recommendations = [];
+    let urgencyLevel = 'low'; // low, medium, high
+    
+    // 最近の健康記録を分析（過去7日間）
+    const recentRecords = getRecentHealthRecords(healthRecords, 7);
+    const hasRecentFever = recentRecords.some(record => record.temperature >= 37.5);
+    const hasRecentSymptoms = recentRecords.some(record => record.throatPain >= 3 || record.runnyNose >= 3);
+    
+    // 回答の解析
+    const hasFever = answers.fever?.value === 'はい';
+    const isOnMedication = answers.medication?.value === 'はい';
+    const homeRemediesLevel = parseInt(answers.homeRemedies?.value || '1');
+    const canWalkToHospital = answers.mobility?.value === 'はい';
+    const hasSupport = answers.support?.value === 'はい';
+    
+    // 緊急度判定
+    if (hasFever && hasRecentFever) {
+        urgencyLevel = 'high';
+        recommendations.push({
+            title: '🚨 緊急受診を推奨',
+            content: '発熱が続いており、早急な医療機関での診察が必要です。',
+            actions: [
+                '今すぐ内科または救急外来を受診してください',
+                '水分補給を十分に行ってください',
+                '症状が悪化した場合は救急車を呼んでください'
+            ]
+        });
+    } else if (hasFever || hasRecentSymptoms) {
+        urgencyLevel = 'medium';
+        
+        if (canWalkToHospital) {
+            recommendations.push({
+                title: '🏥 医療機関受診を推奨',
+                content: '症状が見られるため、医療機関での診察をお勧めします。',
+                actions: [
+                    '内科クリニックまたは病院を受診してください',
+                    '受診前に医療機関に電話で症状を伝えてください',
+                    '薬局で解熱剤や症状緩和薬の購入を検討してください'
+                ]
+            });
+        } else {
+            recommendations.push({
+                title: '🏠 自宅療養と薬局利用',
+                content: '移動が困難な場合の対処法をお勧めします。',
+                actions: [
+                    '近くの薬局で症状に応じた市販薬を購入してください',
+                    hasSupport ? '信頼できる人に薬の購入を依頼してください' : '配達サービスのある薬局を利用してください',
+                    '症状が悪化した場合は往診医や救急要請を検討してください'
+                ]
+            });
+        }
+    }
+    
+    // 既に服薬中の場合の注意
+    if (isOnMedication) {
+        recommendations.push({
+            title: '💊 服薬中の注意事項',
+            content: '現在服用中の薬がある場合の注意点です。',
+            actions: [
+                '新しい薬を服用する前に薬剤師または医師に相談してください',
+                '飲み合わせによる副作用の可能性があります',
+                '現在の薬のリストを医療機関で伝えてください'
+            ]
+        });
+    }
+    
+    // 常備薬のレベルに応じた推奨
+    if (homeRemediesLevel >= 3) {
+        recommendations.push({
+            title: '🏠 常備薬の活用',
+            content: '自宅にある常備薬を有効活用しましょう。',
+            actions: [
+                '解熱剤（アセトアミノフェンなど）を用法用量を守って服用',
+                '喉の痛みには喉スプレーやトローチを使用',
+                '十分な休息と水分補給を心がけてください'
+            ]
+        });
+    } else {
+        recommendations.push({
+            title: '🛒 薬局での購入推奨',
+            content: '常備薬が不足している場合の対処法です。',
+            actions: [
+                '解熱剤（アセトアミノフェン、イブプロフェンなど）',
+                '風邪薬や喉の痛み緩和薬',
+                '経口補水液やビタミン剤も検討してください'
+            ]
+        });
+    }
+    
+    // サポートがない場合の追加推奨
+    if (!hasSupport) {
+        recommendations.push({
+            title: '🤝 サポート体制の構築',
+            content: '一人での療養時の注意点とサポート体制の構築方法です。',
+            actions: [
+                '近隣の薬局の配達サービスを確認してください',
+                '緊急時の連絡先（かかりつけ医、救急相談窓口）を準備',
+                '症状日記をつけて変化を記録してください'
+            ]
+        });
+    }
+    
+    // 症状がない場合の予防推奨
+    if (!hasFever && !hasRecentSymptoms) {
+        urgencyLevel = 'low';
+        recommendations.push({
+            title: '✅ 予防と健康維持',
+            content: '現在症状は見られませんが、予防策を継続しましょう。',
+            actions: [
+                '規則正しい生活と十分な睡眠を心がけてください',
+                '手洗い・うがいを徹底してください',
+                '栄養バランスの良い食事を摂取してください',
+                '定期的な健康記録の継続をお勧めします'
+            ]
+        });
+    }
+    
+    return {
+        urgencyLevel,
+        recommendations,
+        healthSummary: {
+            recentRecords: recentRecords.length,
+            averageTemperature: recentRecords.length > 0 ?
+                (recentRecords.reduce((sum, r) => sum + r.temperature, 0) / recentRecords.length).toFixed(1) : '--',
+            hasRecentFever,
+            hasRecentSymptoms
+        }
+    };
+}
+
+/**
+ * 診断結果を表示
+ */
+function showDiagnosisResult(diagnosis) {
+    // 質問セクションを非表示、結果セクションを表示
+    document.getElementById('ai-diagnosis-questions').classList.add('hidden');
+    document.getElementById('ai-diagnosis-result').classList.remove('hidden');
+    
+    const diagnosisContent = document.getElementById('diagnosis-content');
+    diagnosisContent.innerHTML = '';
+    
+    // 健康記録サマリーを表示
+    if (diagnosis.healthSummary.recentRecords > 0) {
+        const summaryCard = document.createElement('div');
+        summaryCard.className = 'diagnosis-card';
+        summaryCard.innerHTML = `
+            <h4>📊 最近の健康記録（過去7日間）</h4>
+            <p><strong>記録数:</strong> ${diagnosis.healthSummary.recentRecords}日分</p>
+            <p><strong>平均体温:</strong> ${diagnosis.healthSummary.averageTemperature}℃</p>
+            <p><strong>発熱の記録:</strong> ${diagnosis.healthSummary.hasRecentFever ? 'あり' : 'なし'}</p>
+            <p><strong>症状の記録:</strong> ${diagnosis.healthSummary.hasRecentSymptoms ? 'あり' : 'なし'}</p>
+        `;
+        diagnosisContent.appendChild(summaryCard);
+    }
+    
+    // 推奨事項を表示
+    diagnosis.recommendations.forEach(recommendation => {
+        const card = document.createElement('div');
+        card.className = `diagnosis-card urgency-${diagnosis.urgencyLevel}`;
+        
+        const actionsHtml = recommendation.actions.map(action => `<li>${action}</li>`).join('');
+        
+        card.innerHTML = `
+            <h4>${recommendation.title}</h4>
+            <p>${recommendation.content}</p>
+            <ul>${actionsHtml}</ul>
+        `;
+        
+        diagnosisContent.appendChild(card);
+    });
+    
+    // 免責事項を追加
+    const disclaimerCard = document.createElement('div');
+    disclaimerCard.className = 'diagnosis-card';
+    disclaimerCard.innerHTML = `
+        <h4>⚠️ 免責事項</h4>
+        <p>この診断は参考情報であり、医師による診断に代わるものではありません。</p>
+        <p>症状が重篤な場合や心配な場合は、必ず医療機関を受診してください。</p>
+    `;
+    diagnosisContent.appendChild(disclaimerCard);
+}
+
+// AI診断関連のイベントリスナーを追加
+document.addEventListener('DOMContentLoaded', function() {
+    // AI診断モーダルのイベントリスナー
+    const aiDiagnosisModal = document.getElementById('ai-diagnosis-modal');
+    if (aiDiagnosisModal) {
+        // モーダルを閉じる
+        document.getElementById('close-ai-diagnosis').addEventListener('click', function() {
+            aiDiagnosisModal.classList.add('hidden');
+        });
+        
+        // ナビゲーションボタン
+        document.getElementById('prev-question').addEventListener('click', goToPreviousQuestion);
+        document.getElementById('next-question').addEventListener('click', goToNextQuestion);
+        document.getElementById('start-diagnosis').addEventListener('click', performAIDiagnosis);
+        
+        // 結果画面のボタン
+        document.getElementById('restart-diagnosis').addEventListener('click', function() {
+            resetAIDiagnosis();
+            showCurrentQuestion();
+        });
+        
+        document.getElementById('close-diagnosis').addEventListener('click', function() {
+            aiDiagnosisModal.classList.add('hidden');
+        });
+    }
+});

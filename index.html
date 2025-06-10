@@ -3,130 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Book - 次世代型健康管理プラットフォーム</title>
+    <title>health book</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <h1>Health Book</h1>
-                <p>次世代型健康管理プラットフォーム</p>
+    <div class="app-container">
+        <!-- ヘッダー領域 -->
+        <header class="header">
+            <h1 class="header-title">health book</h1>
+            <div class="user-icon" id="user-icon" tabindex="0" role="button" aria-label="マイページ">
+                <svg class="user-silhouette" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
             </div>
-            <nav class="nav">
-                <a href="#dashboard" class="nav-link active">ダッシュボード</a>
-                <a href="#profile" class="nav-link">プロフィール</a>
-                <a href="#settings" class="nav-link">設定</a>
-            </nav>
-        </div>
-    </header>
+        </header>
 
-    <main class="main">
-        <div class="container">
-            <section class="hero">
-                <h2>AI技術と専門家サポートを融合した健康管理</h2>
-                <p>あなたの健康データを一元管理し、予防医療を実現します</p>
-            </section>
-
-            <section class="core-features">
-                <h3>2大コア機能</h3>
-                <div class="feature-cards">
-                    <div class="feature-card" id="health-record">
-                        <div class="card-icon">📊</div>
-                        <h4>健康記録</h4>
-                        <p>バイタルデータ・生活習慣の可視化</p>
-                        <ul>
-                            <li>カスタマイズ可能な記録フォーマット</li>
-                            <li>直感的なデータ入力</li>
-                            <li>トレンド分析</li>
-                        </ul>
-                        <button class="btn-primary" onclick="openHealthRecord()">記録を開始</button>
-                    </div>
-
-                    <div class="feature-card" id="ai-diagnosis">
-                        <div class="card-icon">🤖</div>
-                        <h4>AI診断</h4>
-                        <p>記録データのリアルタイム分析</p>
-                        <ul>
-                            <li>健康リスクの早期警告</li>
-                            <li>パーソナル改善提案</li>
-                            <li>予測分析レポート</li>
-                        </ul>
-                        <button class="btn-primary" onclick="openAIDiagnosis()">AI分析を実行</button>
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <!-- ボタン群 -->
+            <div class="buttons-container">
+                <!-- AI診断ボタン -->
+                <div class="circular-button ai-diagnosis" tabindex="0" role="button" aria-label="AI診断">
+                    <h2 class="button-title">AI診断</h2>
+                    <div class="button-icon">
+                        <svg class="ai-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- クリップボード -->
+                            <rect x="25" y="15" width="50" height="70" rx="4" fill="none"/>
+                            <rect x="30" y="10" width="40" height="8" rx="2" fill="currentColor"/>
+                            
+                            <!-- 拡大鏡 -->
+                            <circle cx="65" cy="35" r="8" fill="none"/>
+                            <line x1="71" y1="41" x2="80" y2="50"/>
+                            
+                            <!-- 心電図波形 -->
+                            <polyline points="30,50 35,50 37,40 39,60 41,30 43,70 45,50 70,50" fill="none"/>
+                        </svg>
                     </div>
                 </div>
-            </section>
 
-            <section class="dashboard-preview">
-                <h3>健康ダッシュボード</h3>
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <h5>今日のバイタル</h5>
-                        <div class="vital-data">
-                            <div class="vital-item">
-                                <span class="vital-label">血圧</span>
-                                <span class="vital-value">120/80</span>
-                                <span class="vital-status normal">正常</span>
-                            </div>
-                            <div class="vital-item">
-                                <span class="vital-label">心拍数</span>
-                                <span class="vital-value">72 bpm</span>
-                                <span class="vital-status normal">正常</span>
-                            </div>
-                            <div class="vital-item">
-                                <span class="vital-label">体重</span>
-                                <span class="vital-value">65.2 kg</span>
-                                <span class="vital-status normal">目標内</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h5>AIアラート</h5>
-                        <div class="alert-list">
-                            <div class="alert-item">
-                                <span class="alert-icon">💡</span>
-                                <span class="alert-text">水分摂取量が少し不足しています</span>
-                            </div>
-                            <div class="alert-item">
-                                <span class="alert-icon">🏃</span>
-                                <span class="alert-text">今日の運動目標まであと30分</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h5>健康統計</h5>
-                        <div class="health-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">記録日数</span>
-                                <span class="stat-value">15日</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">平均健康スコア</span>
-                                <span class="stat-value">85点</span>
-                            </div>
-                        </div>
+                <!-- 健康記録ボタン -->
+                <div class="circular-button health-record" tabindex="0" role="button" aria-label="健康記録">
+                    <h2 class="button-title">健康記録</h2>
+                    <div class="button-icon">
+                        <svg class="record-icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- クリップボード -->
+                            <rect x="25" y="15" width="50" height="70" rx="4" fill="none"/>
+                            <rect x="30" y="10" width="40" height="8" rx="2" fill="currentColor"/>
+                            
+                            <!-- ペン -->
+                            <line x1="60" y1="30" x2="75" y2="15"/>
+                            <line x1="75" y1="15" x2="80" y2="20"/>
+                            <line x1="80" y1="20" x2="65" y2="35"/>
+                            <line x1="65" y1="35" x2="60" y2="30"/>
+                            
+                            <!-- 記録線 -->
+                            <line x1="32" y1="35" x2="55" y2="35"/>
+                            <line x1="32" y1="45" x2="50" y2="45"/>
+                            <line x1="32" y1="55" x2="58" y2="55"/>
+                            <line x1="32" y1="65" x2="45" y2="65"/>
+                        </svg>
                     </div>
                 </div>
-            </section>
-        </div>
-    </main>
+            </div>
 
-    <!-- モーダルウィンドウ -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="modal-body"></div>
+            <!-- カレンダー表示エリア -->
+            <div id="calendar-section" class="calendar-section">
+                <div class="calendar-header">
+                    <h2>健康記録カレンダー</h2>
+                    <button id="add-record-btn" class="add-record-btn">新しく記録する</button>
+                </div>
+                <div class="calendar-navigation">
+                    <button id="prev-month">&lt;</button>
+                    <span id="current-month"></span>
+                    <button id="next-month">&gt;</button>
+                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </div>
+        </main>
+
+        <!-- 健康記録入力モーダル -->
+        <div id="health-record-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>健康記録を入力</h2>
+                    <button class="close-button" id="close-modal">&times;</button>
+                </div>
+                <form id="health-record-form">
+                    <div class="input-group">
+                        <label for="temperature">体温 (℃)</label>
+                        <input type="number" id="temperature" step="0.1" min="35" max="42" placeholder="36.5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="throat-pain">のどの痛み</label>
+                        <div class="rating-buttons">
+                            <button type="button" class="rating-btn" data-rating="1">1</button>
+                            <button type="button" class="rating-btn" data-rating="2">2</button>
+                            <button type="button" class="rating-btn" data-rating="3">3</button>
+                            <button type="button" class="rating-btn" data-rating="4">4</button>
+                            <button type="button" class="rating-btn" data-rating="5">5</button>
+                        </div>
+                        <input type="hidden" id="throat-pain" value="">
+                        <small>1: なし　5: 激痛</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="runny-nose">鼻水</label>
+                        <div class="rating-buttons">
+                            <button type="button" class="rating-btn" data-rating="1">1</button>
+                            <button type="button" class="rating-btn" data-rating="2">2</button>
+                            <button type="button" class="rating-btn" data-rating="3">3</button>
+                            <button type="button" class="rating-btn" data-rating="4">4</button>
+                            <button type="button" class="rating-btn" data-rating="5">5</button>
+                        </div>
+                        <input type="hidden" id="runny-nose" value="">
+                        <small>1: なし　5: 大量</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">記録する</button>
+                        <button type="button" class="cancel-btn" id="cancel-form">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- AI診断モーダル -->
+        <div id="ai-diagnosis-modal" class="modal hidden">
+            <div class="modal-content ai-diagnosis-content">
+                <div class="modal-header">
+                    <h2>AI診断</h2>
+                    <button class="close-button" id="close-ai-diagnosis">&times;</button>
+                </div>
+                
+                <div id="ai-diagnosis-questions" class="ai-diagnosis-section">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="question-counter">
+                        質問 <span id="current-question">1</span> / 5
+                    </div>
+                    
+                    <div class="question-container">
+                        <h3 id="question-text" class="question-text"></h3>
+                        <div id="answer-options" class="answer-options"></div>
+                    </div>
+                    
+                    <div class="navigation-buttons">
+                        <button id="prev-question" class="nav-btn" style="display: none;">前の質問</button>
+                        <button id="next-question" class="nav-btn">次へ</button>
+                        <button id="start-diagnosis" class="submit-btn" style="display: none;">診断開始</button>
+                    </div>
+                </div>
+                
+                <div id="ai-diagnosis-result" class="ai-diagnosis-section hidden">
+                    <div class="result-header">
+                        <h3>🤖 AI診断結果</h3>
+                    </div>
+                    <div id="diagnosis-content" class="diagnosis-content"></div>
+                    <div class="result-actions">
+                        <button id="restart-diagnosis" class="submit-btn">もう一度診断する</button>
+                        <button id="close-diagnosis" class="cancel-btn">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- マイページモーダル -->
+        <div id="mypage-modal" class="modal hidden">
+            <div class="modal-content mypage-content">
+                <div class="modal-header">
+                    <h2>マイページ</h2>
+                    <button class="close-button" id="close-mypage">&times;</button>
+                </div>
+                
+                <div class="mypage-section">
+                    <div class="profile-section">
+                        <div class="profile-avatar">
+                            <svg class="profile-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profile-name">ユーザー</h3>
+                            <p id="profile-email">user@example.com</p>
+                        </div>
+                        <button id="edit-profile-btn" class="edit-btn">編集</button>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h3>健康記録統計</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="total-records">0</div>
+                                <div class="stat-label">記録日数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="avg-temperature">--</div>
+                                <div class="stat-label">平均体温</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="recent-streak">0</div>
+                                <div class="stat-label">連続記録</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions-section">
+                        <button id="export-data-btn" class="action-btn">データエクスポート</button>
+                        <button id="clear-data-btn" class="action-btn danger">データ削除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- プロフィール編集モーダル -->
+        <div id="profile-edit-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>プロフィール編集</h2>
+                    <button class="close-button" id="close-profile-edit">&times;</button>
+                </div>
+                <form id="profile-edit-form">
+                    <div class="input-group">
+                        <label for="edit-name">お名前</label>
+                        <input type="text" id="edit-name" placeholder="お名前を入力">
+                    </div>
+                    <div class="input-group">
+                        <label for="edit-email">メールアドレス</label>
+                        <input type="email" id="edit-email" placeholder="メールアドレスを入力">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">保存</button>
+                        <button type="button" class="cancel-btn" id="cancel-profile-edit">キャンセル</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 Health Book. AI技術と専門家サポートを融合した次世代型健康管理プラットフォーム</p>
-        </div>
-    </footer>
 
     <script src="script.js"></script>
 </body>
